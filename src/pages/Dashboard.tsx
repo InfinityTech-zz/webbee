@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, View, DatePickerIOS } from 'react-native'
 import React, { useEffect } from 'react'
-import { Surface, Appbar, TouchableRipple, Card, IconButton, Text, Button, MD3Colors, TextInput, Switch, Snackbar } from 'react-native-paper';
+import { Surface, Appbar, TouchableRipple, Card, IconButton, Text, Button, MD3Colors, TextInput, Switch, Snackbar, Dialog } from 'react-native-paper';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { TotalState } from '../Interface/totalState';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -25,7 +25,12 @@ const Dashboard = (props: DashboardProps) => {
     const [snackBarvisible, setSnackBarVisible] = React.useState(false);
     const onDismissSnackBar = () => setSnackBarVisible(false);
     const [toastText, setToastText] = React.useState('');
+    const [dialogVisible, setDialogVisible] = React.useState(false);
+    const [deleteID, setDrleteID] = React.useState(0);
     const dispatch = useDispatch();
+    const showDialog = () => setDialogVisible(true);
+
+    const hideDialog = () => setDialogVisible(false);
 
 
     const handleProductNameChange = (text) => {
@@ -137,7 +142,6 @@ const Dashboard = (props: DashboardProps) => {
 
                 })}
                 <Button mode='contained' style={{ marginTop: 10 }} onPress={createProduct}>Save</Button>
-                <Button mode='contained' style={{ marginTop: 10, backgroundColor: 'grey' }} onPress={resetProduct}>Reset</Button>
             </>
         )
 
@@ -145,6 +149,10 @@ const Dashboard = (props: DashboardProps) => {
 
     const createProduct = () => {
         dispatch(addProduct(productSingle))
+        const newAllProd = [...allProducts];
+        newAllProd.push(productSingle);
+        setAlProducts(newAllProd);
+        setSelectedCategory('');
         setSnackBarVisible(true);
         setToastText('Product Successfully Added');
     }
@@ -153,10 +161,6 @@ const Dashboard = (props: DashboardProps) => {
         dispatch(updateProduct(allProducts));
         setSnackBarVisible(true);
         setToastText('Product Successfully Modified');
-    }
-
-    const resetProduct = () => {
-
     }
 
     const onToggleSwitchList = (fieldName, fieldType, prodID) => {
@@ -213,20 +217,32 @@ const Dashboard = (props: DashboardProps) => {
     }
 
     const deleteProductData = (prodID) => {
+        setDrleteID(prodID);
+        setDialogVisible(true);
+    }
+
+    const hardDeleteProduct = () => {
         let newAllProds: Array<ProductData> = [...allProducts];
-        newAllProds = newAllProds.filter(item => item.productID !== prodID);
+        newAllProds = newAllProds.filter(item => item.productID !== deleteID);
         dispatch(deleteProduct(newAllProds));
         setAlProducts(newAllProds);
         setSnackBarVisible(true);
         setToastText('Product Successfully Deleted');
+        setDialogVisible(false);
     }
 
     useEffect(() => {
-        if (products.length > 0) {
+        if (products?.length > 0) {
             setAlProducts(products);
         }
     }, [products])
-
+    if (categories?.length === 0) {
+        return (
+            <Text>
+                No Categories Available
+            </Text>
+        )
+    }
     return (
         <>
             <ScrollView>
@@ -324,11 +340,14 @@ const Dashboard = (props: DashboardProps) => {
 
                             )}
                             <>
-                                <Card key={index} style={styles.card}>
-                                    <Card.Content>
-                                        {selectedCategory === item.categoryName ? addNewProduct(item?.categoryFields, item?.categoryID) : null}
-                                    </Card.Content>
-                                </Card>
+                                {selectedCategory === item.categoryName ? (
+                                    <Card key={index} style={styles.card}>
+                                        <Card.Content>
+                                            {selectedCategory === item.categoryName ? addNewProduct(item?.categoryFields, item?.categoryID) : null}
+                                        </Card.Content>
+                                    </Card>
+                                ) : null}
+
                             </>
 
                         </>
@@ -343,6 +362,15 @@ const Dashboard = (props: DashboardProps) => {
             >
                 {toastText}
             </Snackbar>
+            <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+                <Dialog.Content>
+                    <Text variant="bodyMedium">Are you sure you want to delete the Product? </Text>
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button textColor='red' onPress={hardDeleteProduct}>OK</Button>
+                    <Button onPress={hideDialog}>Cancel</Button>
+                </Dialog.Actions>
+            </Dialog>
         </>
 
     )
