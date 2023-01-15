@@ -8,12 +8,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
-export interface AppProps {
+export interface EntryProps {
 }
 
 const Tab = createBottomTabNavigator();
 
-const Entry = (props: AppProps) => {
+const Entry = (props: EntryProps) => {
 
   return (
     <Tab.Navigator>
