@@ -12,16 +12,23 @@ const inventoryReducer = (state = initialState, action) => {
     case ADD_CATEGORY: {
       const { categoryID, categoryData } = action.payload;
       const { categoryName, categoryFields } = categoryData;
-      if(categoryData.castegoryID){
-        const { categoryID } = categoryData
+      if(categoryData.categoryID){
+        const { categoryID } = categoryData;
+        const foundCategories = [...state.categories];
+        for(let i=0; i< foundCategories.length; i++) {
+            if(foundCategories[i].categoryID === categoryID){
+                foundCategories[i].categoryName = categoryName;
+                foundCategories[i].categoryFields = categoryFields;
+            }
+        }
         return {
             ...state,
-            categories: [ ...state.categories, { categoryID, categoryName, categoryFields }]
+            categories: foundCategories
         };
       } else {
         return {
             ...state,
-            categories: [ ...state.categories, { categoryID, categoryName, categoryFields }]
+            categories: [ ...state.categories, { categoryID: new Date().valueOf(), categoryName, categoryFields }]
           };
       }
     }

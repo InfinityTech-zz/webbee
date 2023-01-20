@@ -6,7 +6,7 @@ import { createStore } from 'redux'
 
 
 const persistConfig = {
-  key: 'root',
+  key: 'beebomNew',
   storage: AsyncStorage,
 }
 
